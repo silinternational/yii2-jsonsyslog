@@ -110,6 +110,12 @@ class JsonSyslogTarget extends \yii\log\SyslogTarget
         return Json::encode($logData);
     }
     
+    /**
+     * Determine whether the given value is a string that parses as valid JSON.
+     * 
+     * @param string $string The value to check.
+     * @return boolean
+     */
     private function isJsonString($string)
     {
         if (! is_string($string)) {
