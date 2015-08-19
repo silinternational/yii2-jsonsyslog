@@ -1,0 +1,16 @@
+{
+    "name": "silinternational/yii2-jsonsyslog",
+    "type": "library",
+    "description": "Yii2 log target for sending data to Syslog as a JSON encoded string",
+    "keywords": ["yii2", "syslog", "log", "json"],
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Sil\\JsonSyslog\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=5.4.0",
+        "yiisoft/yii2": "2.*"
+    }
+}
