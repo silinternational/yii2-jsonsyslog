@@ -10,6 +10,27 @@ use yii\log\Logger;
 class JsonSyslogTarget extends \yii\log\SyslogTarget
 {
     /**
+     * rsyslog has severity codes for
+     * emerg 0, alert 1, crit 2, error 3, warning 4, notice 5, info 6, debug 7
+     * LEVEL_INFO produces too many log entries so adding LEVEL_NOTICE allows for
+     * a different option.
+     */
+    const LEVEL_NOTICE = 0x03;
+
+    /**
+     * @var array syslog levels
+     */
+    private $_syslogLevels = [
+        Logger::LEVEL_TRACE => LOG_DEBUG,
+        Logger::LEVEL_PROFILE_BEGIN => LOG_DEBUG,
+        Logger::LEVEL_PROFILE_END => LOG_DEBUG,
+        Logger::LEVEL_INFO => LOG_INFO,
+        self::LEVEL_NOTICE => LOG_NOTICE,
+        Logger::LEVEL_WARNING => LOG_WARNING,
+        Logger::LEVEL_ERROR => LOG_ERR,
+    ];
+
+    /**
      * If the prefix is a JSON string with key-value data, extract it as an
      * associative array. Otherwise return null.
      * 
@@ -78,6 +99,41 @@ class JsonSyslogTarget extends \yii\log\SyslogTarget
     }
     
     /**
+     * Returns the text display of the specified level.
+     * @param integer $level the message level, e.g. [[LEVEL_ERROR]], [[LEVEL_WARNING]].
+     * @return string the text display of the level
+     */
+    public static function getLevelName($level)
+    {
+        static $levels = [
+            Logger::LEVEL_ERROR => 'error',
+            Logger::LEVEL_WARNING => 'warning',
+            self::LEVEL_NOTICE => 'notice',
+            Logger::LEVEL_INFO => 'info',
+            Logger::LEVEL_TRACE => 'trace',
+            Logger::LEVEL_PROFILE_BEGIN => 'profile begin',
+            Logger::LEVEL_PROFILE_END => 'profile end',
+        ];
+
+        $LevelName = $levels[$level];
+        echo "getLevelName  is $LevelName\n";
+
+        return isset($levels[$level]) ? $levels[$level] : 'unknown';
+    }
+
+    /**
+     * Writes log messages to syslog
+     */
+    public function export()
+    {
+        openlog($this->identity, LOG_ODELAY | LOG_PID, $this->facility);
+        foreach ($this->messages as $message) {
+            syslog($this->_syslogLevels[$message[1]], $this->formatMessage($message));
+        }
+        closelog();
+    }
+
+    /**
      * @inheritdoc
      */
     public function formatMessage($loggerMessage)
@@ -102,7 +158,7 @@ class JsonSyslogTarget extends \yii\log\SyslogTarget
             $logData['prefix'] = $prefix;
         }
         
-        $logData['level'] = Logger::getLevelName($level);
+        $logData['level'] = $this->getLevelName($level);
         $logData['category'] = $category;
         $logData['message'] = $this->extractMessageContentData($messageContent);
         
