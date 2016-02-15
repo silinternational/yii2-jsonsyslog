@@ -10,7 +10,7 @@ use yii\log\Logger;
 class JsonSyslogTarget extends \yii\log\SyslogTarget
 {
     /**
-     * rsyslog has severity codes for
+     * rsyslog has severity codes fo
      * emerg 0, alert 1, crit 2, error 3, warning 4, notice 5, info 6, debug 7
      * LEVEL_INFO produces too many log entries so adding LEVEL_NOTICE allows for
      * a different option.
